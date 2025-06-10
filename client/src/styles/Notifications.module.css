@@ -587,9 +587,13 @@
 @media (max-width: 576px) {
   .notification-dropdown {
     width: 300px;
-    right: -100px;
+    /* Eliminamos right:-100px; */
+    left: 50%;
+    transform: translateX(-50%);
+    top: 110%; /* un pelín más abajo si quieres */
   }
 }
+
 
 
 /* client/src/styles/NotificationsPage.css */
