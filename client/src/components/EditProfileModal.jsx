@@ -1,9 +1,11 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import axios from "axios"
 import styles from "../styles/EditProfileModal.module.css"
 
-// Elimina cualquier pragma especial de Next.js
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || ""
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 
 const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
   const [bio, setBio] = useState("")
@@ -16,7 +18,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
     if (profile) {
       setBio(profile.bio || "")
       setPreviewImage(getImageUrl(profile.profileImage))
-      setProfileImage(null)
+      setProfileImage(null) // Reset file input on profile change
       setError("")
     }
   }, [profile])
@@ -41,43 +43,27 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
     setError("")
 
     try {
-      // 1) Actualizar bio
-      const bioResponse = await axios.put(
-        `${BASE_URL}/api/users/bio`,
-        { bio },
-        { withCredentials: true }
-      )
+      // Actualizar bio
+      const bioResponse = await axios.put(`${BASE_URL}/api/users/bio`, { bio })
 
       let imageResponse = null
       if (profileImage) {
-        // 2) Enviar nueva imagen
         const formData = new FormData()
         formData.append("profileImage", profileImage)
-        imageResponse = await axios.patch(
-          `${BASE_URL}/api/users/profile-image`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-            withCredentials: true
-          }
-        )
+        imageResponse = await axios.put(`${BASE_URL}/api/users/profile-image`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
       }
 
-      // 3) Actualizar en el padre
       onProfileUpdate({
         bio: bioResponse.data.bio,
-        profileImage: imageResponse
-          ? imageResponse.data.profileImage
-          : profile.profileImage,
+        profileImage: imageResponse ? imageResponse.data.profileImage : profile.profileImage,
       })
 
       onClose()
-    } catch (err) {
-      console.error("Error al actualizar perfil:", err)
-      setError(
-        err.response?.data?.message ||
-          "Error al actualizar el perfil. Inténtalo de nuevo."
-      )
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error)
+      setError(error.response?.data?.message || "Error al actualizar el perfil. Inténtalo de nuevo.")
     } finally {
       setLoading(false)
     }
@@ -90,7 +76,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
       <div className={styles.editProfileModal}>
         <div className={styles.modalHeader}>
           <h2>Editar Perfil</h2>
-          <button onClick={onClose} disabled={loading} className={styles.closeButton}>
+          <button className={styles.closeButton} onClick={onClose} disabled={loading}>
             &times;
           </button>
         </div>
@@ -104,17 +90,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
               src={previewImage || "/placeholder.svg?height=150&width=150"}
               alt="Vista previa"
               className={styles.previewImage}
-              onError={(e) => {
-                e.target.onerror = null
-                e.target.src = "/placeholder.svg?height=150&width=150"
-              }}
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={loading}
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} disabled={loading} />
           </div>
 
           <div>
@@ -131,10 +108,10 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
           </div>
 
           <div className={styles.formActions}>
-            <button type="button" onClick={onClose} disabled={loading} className={styles.cancelButton}>
+            <button type="button" className={styles.cancelButton} onClick={onClose} disabled={loading}>
               Cancelar
             </button>
-            <button type="submit" disabled={loading} className={styles.saveButton}>
+            <button type="submit" className={styles.saveButton} disabled={loading}>
               {loading ? "Guardando..." : "Guardar Cambios"}
             </button>
           </div>
