@@ -10,7 +10,7 @@ const createPost = async (req, res) => {
   let image = null
   try {
     if (req.file) {
-      image = req.file.filename
+      image = `/uploads/${req.file.filename}`;
     }
 
     if (!content && !image) {
@@ -360,7 +360,7 @@ const updatePost = async (req, res) => {
           fs.unlinkSync(oldImagePath)
         }
       }
-      image = req.file.filename
+      image = `/uploads/${req.file.filename}`;
     }
 
     if (!content && !image) {
