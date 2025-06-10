@@ -161,16 +161,14 @@
   }
 }
 
-/* Perfil – encabezado */
 .profile-username-container {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* espacia el nombre a la izquierda y el botón a la derecha */
-  flex-wrap: wrap;                 /* deja que content se envuelva si no cabe */
+  justify-content: space-between; 
+  flex-wrap: wrap;                 
   margin-bottom: 15px;
 }
 
-/* Ajustes para el nombre y botón */
 .profile-username {
   font-size: 28px;
   margin: 0;
@@ -183,20 +181,19 @@
   padding: 6px 12px;
   font-weight: bold;
   cursor: pointer;
-  white-space: nowrap; /* evita que el texto del botón se rompa */
+  white-space: nowrap; 
 }
 
-/* En móviles, los ponemos uno debajo del otro */
 @media (max-width: 600px) {
   .profile-username-container {
     flex-direction: column;
-    align-items: flex-start;  /* alineamos a la izquierda */
+    align-items: flex-start;  
   }
   .profile-username {
-    margin-bottom: 8px;      /* espacio antes del botón */
-    font-size: 24px;         /* opcional: letra algo más pequeña */
+    margin-bottom: 8px;      
+    font-size: 24px;         
   }
   .edit-profile-button {
-    align-self: flex-start;  /* botón al inicio de la línea */
+    align-self: flex-start;  
   }
 }

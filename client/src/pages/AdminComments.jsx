@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import styles from "../styles/Admin.module.css"
+import { useNavigate } from "react-router-dom"
+
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const AdminComments = () => {
+  const navigate = useNavigate()
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ total: 0, pages: 1 })
