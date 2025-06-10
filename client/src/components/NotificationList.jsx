@@ -66,9 +66,9 @@ const NotificationList = () => {
     switch (type) {
       case "like":
       case "comment":
-        return `${BASE_URL}/post/${postId}`
+        return `/post/${postId}`
       case "follow":
-        return `${BASE_URL}/profile/${senderUsername}`
+        return `/profile/${senderUsername}`
       default:
         return "#"
     }
