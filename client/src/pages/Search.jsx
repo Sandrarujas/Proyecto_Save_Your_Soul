@@ -94,7 +94,7 @@ const Search = () => {
           {users.length > 0 ? (
             users.map((user, index) => (
               <div key={user.id} className={styles["user-card"]}>
-                <Link to={`${BASE_URL}/profile/${user.username}`} className={styles["user-info"]}>
+                <Link to={`/profile/${user.username}`} className={styles["user-info"]}>
                   <img
                     src={
                       user.profileImage
