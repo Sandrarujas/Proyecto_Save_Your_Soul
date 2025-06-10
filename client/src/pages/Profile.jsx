@@ -1,4 +1,5 @@
-// src/pages/Profile.jsx
+"use client"
+
 import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -60,13 +61,61 @@ const Profile = () => {
     setPosts((ps) => ps.filter((p) => p.id !== postId));
   };
 
-  if (loading)  return <div>Cargando perfil…</div>;
-  if (error)    return <div className="error">{error}</div>;
+  if (loading) return <div>Cargando perfil…</div>;
+  if (error) return <div className="error">{error}</div>;
   if (!profile) return <div>Usuario no encontrado</div>;
 
   return (
     <div className="profile-container">
-      {/* Cabecera de perfil… */}
+      <div className="profile-header">
+        <div className="profile-image-container">
+          <img
+            src={
+              profile.profileImage?.startsWith("http")
+                ? profile.profileImage
+                : `${BASE_URL}${profile.profileImage}`
+            }
+            alt={profile.username}
+            className="profile-image"
+          />
+          {isOwnProfile && (
+            <button
+              className="edit-profile-image-button"
+              onClick={() => setIsEditProfileOpen(true)}
+            >
+              Cambiar foto
+            </button>
+          )}
+        </div>
+        <div className="profile-info">
+          <div className="profile-username-container">
+            <h2 className="profile-username">{profile.username}</h2>
+            {isOwnProfile && (
+              <button
+                className="edit-profile-button"
+                onClick={() => setIsEditProfileOpen(true)}
+              >
+                Editar Perfil
+              </button>
+            )}
+          </div>
+          <div className="profile-stats">
+            <div className="profile-stat">
+              <span className="stat-count">{profile.posts}</span>
+              <span className="stat-label">Publicaciones</span>
+            </div>
+            <div className="profile-stat">
+              <span className="stat-count">{profile.followers}</span>
+              <span className="stat-label">Seguidores</span>
+            </div>
+            <div className="profile-stat">
+              <span className="stat-count">{profile.following}</span>
+              <span className="stat-label">Siguiendo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {isOwnProfile && (
         <EditProfileModal
           isOpen={isEditProfileOpen}
