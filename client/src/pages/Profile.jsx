@@ -78,12 +78,25 @@ const handleProfileUpdate = (updatedData) => {
   }
 };
 
+const handleProfileUpdate = (updatedData) => {
+    setProfile({
+      ...profile,
+      ...updatedData,
+    })
+  }
+
+ 
+
+  // Función mejorada para manejar la actualización de publicaciones
   const handlePostUpdate = (updatedPost) => {
-    console.log("Actualizando publicación:", updatedPost);
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => (post.id === updatedPost.id ? { ...post, ...updatedPost } : post))
-    );
-  };
+    console.log("Actualizando publicación:", updatedPost)
+    setPosts(prevPosts => prevPosts.map(post => 
+      post.id === updatedPost.id 
+        ? { ...post, ...updatedPost } 
+        : post
+    ))
+  }
+
 
   const handlePostDelete = (postId) => {
     console.log("Eliminando publicación:", postId);
