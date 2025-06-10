@@ -1,295 +1,116 @@
-"use client"
+// src/components/Post.jsx
+import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
+import CommentList from "./CommentList";
+import EditPostModal from "./EditPostModal";
 
-import { useState, useContext } from "react"
-import { Link } from "react-router-dom"
-import axios from "axios"
-import { AuthContext } from "../context/AuthContext"
-import CommentList from "./CommentList"
-import EditPostModal from "./EditPostModal"
-import styles from "../styles/Post.module.css"
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
+const Post = ({ post, onPostUpdate, onPostDelete }) => {
+  const { user, updatePostLikes, updatePostComments, deletePost: deleteFromCtx } = useContext(AuthContext);
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  const [likes, setLikes] = useState(post.likes);
+  const [liked, setLiked] = useState(post.liked);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState(post.comments);
+  const [commentCount, setCommentCount] = useState(post.commentCount);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-const Post = ({ post, onPostUpdate, onPostDelete, onCommentAdded, onLikeToggled }) => {
-  const {
-    user,
-    updatePost,
-    deletePost: deletePostFromContext,
-    updatePostLikes,
-    updatePostComments,
-  } = useContext(AuthContext)
+  const isOwner = user?.id === post.user.id;
+  const imgUrl = post.image?.startsWith("http")
+    ? post.image
+    : `${BASE_URL}${post.image}`;
 
-  const [likes, setLikes] = useState(post.likes || 0)
-  const [liked, setLiked] = useState(post.liked || false)
-  const [showComments, setShowComments] = useState(false)
-  const [commentText, setCommentText] = useState("")
-  const [comments, setComments] = useState(post.comments || [])
-  const [commentCount, setCommentCount] = useState(post.commentCount || post.comments?.length || 0)
-  const [loadingComments, setLoadingComments] = useState(false)
-  const [allCommentsLoaded, setAllCommentsLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
-
-  const isOwner = user && post.user && user.id === post.user.id
-
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null
-    if (imagePath.startsWith("http")) return imagePath
-    return `${BASE_URL}${imagePath}`
+  async function handleLike() {
+    await axios.post(`${BASE_URL}/api/posts/${post.id}/like`, {}, { withCredentials: true });
+    const nl = !liked, cnt = nl ? likes + 1 : likes - 1;
+    setLiked(nl); setLikes(cnt);
+    updatePostLikes(post.id, nl, cnt);
+    onPostUpdate({ ...post, liked: nl, likes: cnt });
   }
 
-  const handleLike = async () => {
-    try {
-      await axios.post(`${BASE_URL}/api/posts/${post.id}/like`)
-      const newLiked = !liked
-      const newLikes = liked ? likes - 1 : likes + 1
-
-      setLiked(newLiked)
-      setLikes(newLikes)
-
-      updatePostLikes(post.id, newLiked, newLikes)
-
-      if (onPostUpdate) {
-        onPostUpdate({
-          ...post,
-          liked: newLiked,
-          likes: newLikes,
-        })
-      }
-
-      if (onLikeToggled) {
-        onLikeToggled(newLiked)
-      }
-    } catch (error) {
-      console.error("Error liking post:", error)
-      // No revertimos los estados porque ya están sin cambios aquí, solo logueamos
-    }
+  async function handleDelete() {
+    if (!window.confirm("¿Eliminar esta publicación?")) return;
+    setIsDeleting(true);
+    await axios.delete(`${BASE_URL}/api/posts/${post.id}`, { withCredentials: true });
+    deleteFromCtx(post.id);
+    onPostDelete(post.id);
   }
 
-  const handleComment = async (e) => {
-    e.preventDefault()
-    if (!commentText.trim()) return
-
-    try {
-      const res = await axios.post(`${BASE_URL}/api/posts/${post.id}/comment`, {
-        content: commentText,
-      })
-
-      const newCommentCount = commentCount + 1
-
-      setComments([res.data, ...comments])
-      setCommentCount(newCommentCount)
-      setCommentText("")
-
-      updatePostComments(post.id, newCommentCount)
-
-      if (onPostUpdate) {
-        onPostUpdate({
-          ...post,
-          commentCount: newCommentCount,
-        })
-      }
-
-      if (onCommentAdded) {
-        onCommentAdded()
-      }
-    } catch (error) {
-      console.error("Error commenting on post:", error)
-    }
-  }
-
-  const toggleComments = async () => {
-    setShowComments((prev) => !prev)
-
-    if (showComments) return
-
-    if (comments.length === 0) {
-      try {
-        setLoadingComments(true)
-        const res = await axios.get(`${BASE_URL}/api/posts/${post.id}/comments?limit=5`)
-        setComments(res.data.comments)
-        setAllCommentsLoaded(res.data.comments.length >= res.data.pagination.total)
-      } catch (error) {
-        console.error("Error loading comments:", error)
-      } finally {
-        setLoadingComments(false)
-      }
-    }
-  }
-
-  const loadMoreComments = async () => {
-    try {
-      setLoadingComments(true)
-      const page = Math.floor(comments.length / 5) + 1
-      const res = await axios.get(`${BASE_URL}/api/posts/${post.id}/comments?page=${page}&limit=5`)
-
-      setComments([...comments, ...res.data.comments])
-      setAllCommentsLoaded(comments.length + res.data.comments.length >= res.data.pagination.total)
-    } catch (error) {
-      console.error("Error loading more comments:", error)
-    } finally {
-      setLoadingComments(false)
-    }
-  }
-
-  const handleImageError = () => {
-    console.error("Error al cargar la imagen:", post.image)
-    setImageError(true)
-  }
-
-  const handleEditPost = () => {
-    setIsEditModalOpen(true)
-    setShowOptions(false)
-  }
-
-  const handleDeletePost = async () => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar esta publicación?")) {
-      try {
-        setIsDeleting(true)
-        await axios.delete(`${BASE_URL}/api/posts/${post.id}`)
-
-        deletePostFromContext(post.id)
-
-        if (onPostDelete) {
-          onPostDelete(post.id)
-        }
-      } catch (error) {
-        console.error("Error al eliminar publicación:", error)
-        alert("Error al eliminar la publicación")
-      } finally {
-        setIsDeleting(false)
-      }
-    }
-  }
-
-  const handlePostUpdate = (updatedPost) => {
-    setImageError(false)
-    updatePost(post.id, updatedPost)
-    if (onPostUpdate) {
-      onPostUpdate(updatedPost)
-    }
-  }
-
-  const toggleOptions = () => {
-    setShowOptions((prev) => !prev)
-  }
+  const openEdit = () => { setShowOptions(false); setIsEditOpen(true); };
+  const applyEdit = (upd) => { setImageError(false); onPostUpdate(upd); setIsEditOpen(false); };
 
   return (
-    <div className={styles.post}>
-      <div className={styles["post-header"]}>
-        <Link to={`/profile/${post.user.username}`} className={styles["post-user"]}>
+    <div className="post-card">
+      <header>
+        <Link to={`/profile/${post.user.username}`}>
           <img
-            src={getImageUrl(post.user.profileImage) || "/placeholder.svg?height=40&width=40"}
+            src={post.user.profileImage ? `${BASE_URL}${post.user.profileImage}` : "/placeholder.svg"}
             alt={post.user.username}
-            className={styles["post-user-image"]}
-            onError={(e) => (e.target.src = "/placeholder.svg?height=40&width=40")}
+            className="avatar"
+            onError={() => setImageError(true)}
           />
-          <span className={styles["post-username"]}>{post.user.username}</span>
+          <span>{post.user.username}</span>
         </Link>
-        <div className={styles["post-header-right"]}>
-          <span className={styles["post-date"]}>{new Date(post.createdAt).toLocaleDateString()}</span>
-          {isOwner && (
-            <div className={styles["post-options"]}>
-              <button className={styles["post-options-button"]} onClick={toggleOptions}>
-                ⋮
-              </button>
-              {showOptions && (
-                <div className={styles["post-options-menu"]}>
-                  <button onClick={handleEditPost} disabled={isDeleting}>
-                    Editar
-                  </button>
-                  <button onClick={handleDeletePost} disabled={isDeleting}>
-                    {isDeleting ? "Eliminando..." : "Eliminar"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className={styles["post-content"]}>
-        <p>{post.content}</p>
-        {post.image && !imageError && (
-          <div className={styles["post-image-container"]}>
-            <img
-              src={getImageUrl(post.image) || "/placeholder.svg"}
-              alt="Post"
-              className={styles["post-image"]}
-              onError={handleImageError}
-            />
+        {isOwner && (
+          <div className="options">
+            <button onClick={() => setShowOptions((v) => !v)}>⋮</button>
+            {showOptions && (
+              <>
+                <button onClick={openEdit} disabled={isDeleting}>Editar</button>
+                <button onClick={handleDelete} disabled={isDeleting}>
+                  {isDeleting ? "Eliminando…" : "Eliminar"}
+                </button>
+              </>
+            )}
           </div>
         )}
-        {imageError && (
-          <div className={styles["post-image-error"]}>
-            <p>No se pudo cargar la imagen</p>
-            <p className={styles["post-image-path"]}>Ruta: {post.image}</p>
-          </div>
-        )}
-      </div>
-      <div className={styles["post-actions"]}>
-        <button
-          className={`${styles["post-like-button"]} ${liked ? styles.liked : ""}`}
-          onClick={handleLike}
-          aria-pressed={liked}
-        >
-          {liked ? "❤️" : "🤍"} {likes}
-        </button>
-        <button className={styles["post-comment-button"]} onClick={toggleComments}>
-          💬 {commentCount}
-        </button>
-      </div>
-      {showComments && (
-        <div className={styles["post-comments"]}>
-          <form onSubmit={handleComment} className={styles["comment-form"]}>
-            <input
-              type="text"
-              placeholder="Escribe un comentario..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              className={styles["comment-input"]}
-            />
-            <button type="submit" className={styles["comment-submit"]}>
-              Enviar
-            </button>
-          </form>
+      </header>
 
-          {loadingComments && comments.length === 0 ? (
-            <div className={styles.loading}>Cargando comentarios...</div>
-          ) : (
-            <>
-              <CommentList comments={comments} />
-
-              {!allCommentsLoaded && commentCount > comments.length && (
-                <div className={styles["view-all-comments"]}>
-                  <button
-                    className={styles["view-all-comments-button"]}
-                    onClick={loadMoreComments}
-                    disabled={loadingComments}
-                  >
-                    {loadingComments
-                      ? "Cargando..."
-                      : `Ver más comentarios (${commentCount - comments.length} restantes)`}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+      <p>{post.content}</p>
+      {imgUrl && !imageError && (
+        <img
+          src={imgUrl}
+          alt="Post"
+          className="post-image"
+          onError={() => setImageError(true)}
+        />
       )}
 
-      {isEditModalOpen && (
+      <footer>
+        <button onClick={handleLike}>{liked ? "❤️" : "🤍"} {likes}</button>
+        <button onClick={() => setShowComments((v) => !v)}>💬 {commentCount}</button>
+      </footer>
+
+      {showComments && (
+        <CommentList
+          comments={comments}
+          postId={post.id}
+          onNewComment={(c) => {
+            setComments([c, ...comments]);
+            setCommentCount(commentCount + 1);
+            updatePostComments(post.id, commentCount + 1);
+            onPostUpdate({ ...post, comments: [c, ...comments], commentCount: commentCount + 1 });
+          }}
+        />
+      )}
+
+      {isEditOpen && (
         <EditPostModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          isOpen={isEditOpen}
           post={post}
-          onPostUpdate={handlePostUpdate}
+          onClose={() => setIsEditOpen(false)}
+          onPostUpdate={applyEdit}
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Post
+export default Post;
