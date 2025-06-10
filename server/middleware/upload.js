@@ -5,7 +5,7 @@ const path = require('path');
 // Carpeta donde guardarás los uploads (asegúrate de que existe /uploads)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
+    cb(null, path.join(__dirname, '../uploads'));
   },
   filename: (req, file, cb) => {
     // Ejemplo: usuarioId-timestamp.ext
