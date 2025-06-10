@@ -325,6 +325,8 @@ const commentPost = async (req, res) => {
       createdAt: new Date(),
       user: {
         id: userId,
+        username,           
+        profileImage, 
       },
     })
   } catch (error) {
