@@ -3,9 +3,8 @@
 import { useState, useEffect, useContext } from "react"
 import { Link } from "react-router-dom"
 import { AuthContext } from "../context/AuthContext"
+import Avatar from "./Avatar"
 import styles from "../styles/Notifications.module.css"
-
-const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const NotificationList = () => {
   const {
@@ -28,28 +27,12 @@ const NotificationList = () => {
     }
   }, [showDropdown, fetchNotifications])
 
-  const handleMarkAsRead = async (id) => {
-    try {
-      await markNotificationAsRead(id)
-    } catch (error) {
-      console.error("Error al marcar notificación:", error)
-    }
-  }
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllNotificationsAsRead()
-    } catch (error) {
-      console.error("Error al marcar todas las notificaciones:", error)
-    }
-  }
-
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev)
     setError("")
   }
 
-  const getNotificationContent = ({ type, senderUsername }) => {
+  const renderNotificationContent = ({ type, senderUsername }) => {
     switch (type) {
       case "like":
         return `${senderUsername} le dio like a tu publicación`
@@ -62,7 +45,7 @@ const NotificationList = () => {
     }
   }
 
-  const getNotificationLink = ({ type, postId, senderUsername }) => {
+  const renderNotificationLink = ({ type, postId, senderUsername }) => {
     switch (type) {
       case "like":
       case "comment":
@@ -74,7 +57,7 @@ const NotificationList = () => {
     }
   }
 
-  const getNotificationIcon = (type) => {
+  const renderNotificationIcon = (type) => {
     switch (type) {
       case "like":
         return <i className={`fas fa-heart ${styles["notification-icon"]} ${styles.like}`}></i>
@@ -87,24 +70,27 @@ const NotificationList = () => {
     }
   }
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath || typeof imagePath !== "string") return "/placeholder.svg?height=40&width=40"
-    return imagePath.startsWith("http") ? imagePath : `${BASE_URL}${imagePath}`
-  }
-
   return (
     <div className={styles["notification-container"]}>
-      <div className={styles["notification-bell"]} onClick={toggleDropdown} role="button" tabIndex={0} aria-label="Mostrar notificaciones">
+      {/* Campana y contador */}
+      <div
+        className={styles["notification-bell"]}
+        onClick={toggleDropdown}
+        role="button"
+        tabIndex={0}
+        aria-label="Mostrar notificaciones"
+      >
         <i className="fas fa-bell"></i>
         {unreadCount > 0 && <span className={styles["notification-badge"]}>{unreadCount}</span>}
       </div>
 
+      {/* Dropdown de notificaciones */}
       {showDropdown && (
         <div className={styles["notification-dropdown"]}>
           <div className={styles["notification-header"]}>
             <h3>Notificaciones</h3>
             {unreadCount > 0 && (
-              <button className={styles["mark-all-read"]} onClick={handleMarkAllAsRead}>
+              <button className={styles["mark-all-read"]} onClick={markAllNotificationsAsRead}>
                 Marcar todas como leídas
               </button>
             )}
@@ -119,27 +105,26 @@ const NotificationList = () => {
               {notifications.map((notification) => (
                 <Link
                   key={notification.id}
-                  to={getNotificationLink(notification)}
+                  to={renderNotificationLink(notification)}
                   className={`${styles["notification-item"]} ${!notification.isRead ? styles["unread"] : ""}`}
-                  onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                  onClick={() => !notification.isRead && markNotificationAsRead(notification.id)}
                 >
                   <div className={styles["notification-avatar"]}>
-                    <img
-                      src={getImageUrl(notification.senderProfileImage)}
-                      alt={notification.senderUsername}
-                      className="notification-user-image"
-                      onError={(e) => {
-                        e.target.src = "/placeholder.svg?height=40&width=40"
-                      }}
+                    <Avatar
+                      src={notification.senderProfileImage}
+                      username={notification.senderUsername}
+                      size={40}
                     />
-                    {getNotificationIcon(notification.type)}
+                    {renderNotificationIcon(notification.type)}
                   </div>
+
                   <div className={styles["notification-content"]}>
-                    <p>{getNotificationContent(notification)}</p>
+                    <p>{renderNotificationContent(notification)}</p>
                     <span className={styles["notification-time"]}>
                       {new Date(notification.createdAt).toLocaleDateString()}
                     </span>
                   </div>
+
                   {!notification.isRead && <div className={styles["notification-dot"]}></div>}
                 </Link>
               ))}
@@ -159,4 +144,4 @@ const NotificationList = () => {
   )
 }
 
-export default NotificationList
+export default NotificationList;

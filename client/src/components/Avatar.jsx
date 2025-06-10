@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
 
-// Base URL de la API (con fallback)
+// Base URL de la API (configurada en .env como REACT_APP_API_BASE_URL)
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
+/**
+ * Componente Avatar:
+ * - Muestra un placeholder si no hay src o hay error de carga
+ * - Soporta URLs absolutas (http(s)://) y relativas (BASE_URL)
+ * - Añade un parámetro "v" si se pasa la prop version para bust cache
+ */
 const Avatar = ({ src, username, size = 40, version = '' }) => {
   const [error, setError] = useState(false);
 
-  // Cuando cambian src o version, reseteamos error para reintentar cargar
+  // Cada vez que cambian src o version, reseteamos el flag de error
   useEffect(() => {
     setError(false);
   }, [src, version]);
 
-  // Construye la URL de la imagen, o devuelve el placeholder si hay error o no hay src
   const getImageUrl = () => {
-    if (error || !src) {
+    // Si no hay imagen o hubo error, uso placeholder con dimensiones
+    if (!src || error) {
       return `/placeholder.svg?height=${size}&width=${size}`;
     }
+
+    // Determinar si es URL absoluta
     const isAbsolute = src.startsWith('http') || src.startsWith('//');
     const fullUrl = isAbsolute ? src : `${BASE_URL}${src}`;
-    // Agregar version para bust cache si se proporciona
+
+    // Añadir bust cache si version está presente
     return version ? `${fullUrl}?v=${version}` : fullUrl;
   };
 
