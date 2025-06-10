@@ -324,9 +324,7 @@ const commentPost = async (req, res) => {
       content: content.trim(),
       createdAt: new Date(),
       user: {
-        id: userId,
-        username,           
-        profileImage, 
+        id: userId
       },
     })
   } catch (error) {
