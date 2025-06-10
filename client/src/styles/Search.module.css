@@ -1,12 +1,29 @@
-
-.search-form {
+.searchWrapper {
   display: flex;
-  margin: 0 20px;
-  flex: 1;
-  max-width: 400px;
+  align-items: center;
+  position: relative;
 }
 
-.search-input {
+/* Botón lupa en móvil, oculto en desktop */
+.mobileToggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #333;
+  margin: 0 10px;
+}
+
+/* Formulario por defecto */
+.searchForm {
+  display: flex;
+  flex: 1;
+  max-width: 400px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.searchInput {
   flex: 1;
   padding: 8px 12px;
   border: 1px solid #dddfe2;
@@ -14,113 +31,54 @@
   font-size: 14px;
 }
 
-.search-button {
+.searchButton {
   background-color: rgb(32, 124, 105);
   color: white;
   border: none;
   padding: 3px 12px;
   border-radius: 0 20px 20px 0;
   font-size: 14px;
-}
-
-.search-container {
-  padding: 20px 0;
-}
-
-.search-container h1 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: black;
-}
-
-.search-tabs {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
 }
 
-.tab-button {
-  background: none;
-  border: none;
-  padding: 10px 20px;
-  margin: 0 10px;
-  font-size: 16px;
-  color: #65676b;
-  border-bottom: 2px solid transparent;
-}
-
-.tab-button.active {
-  color: rgb(32, 124, 105);
-  border-bottom: 2px solid rgb(32, 124, 105);
-}
-
-.users-results {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.user-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #1c1e21;
-}
-
-.user-image {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 15px;
-  object-fit: cover;
-}
-
-.user-details {
-  flex: 1;
-}
-
-.user-username {
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.user-bio {
-  font-size: 14px;
-  color: #65676b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 300px;
-}
-
-.no-results {
-  text-align: center;
-  color: #65676b;
-  margin-top: 30px;
-}
-
-.follow-button {
-  background-color: rgb(32, 124, 105);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.follow-button.following {
-  background-color: #e4e6eb;
-  color: #1c1e21;
+/* MEDIACQ mobile: ≤ 480px */
+@media (max-width: 480px) {
+  /* mostramos solo la lupa */
+  .mobileToggle {
+    display: block;
+  }
+  /* escondemos el form por defecto */
+  .searchForm {
+    position: absolute;
+    top: 50px;      /* ajusta según tu navbar */
+    left: 50%;
+    transform: translateX(-50%) scaleY(0);
+    transform-origin: top;
+    width: 90%;
+    max-width: 300px;
+    opacity: 0;
+    pointer-events: none;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  /* cuando esté abierto */
+  .searchForm.open {
+    transform: translateX(-50%) scaleY(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* reducimos padding y fuentes */
+  .searchInput {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  .searchButton {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
 }
