@@ -5,6 +5,8 @@ import axios from "axios"
 export const AuthContext = createContext()
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+console.log("API_BASE_URL en runtime =", process.env.REACT_APP_API_BASE_URL);
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
