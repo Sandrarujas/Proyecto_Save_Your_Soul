@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import styles from '../styles/EditPostModal.module.css';
+"use client"
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import styles from "../styles/EditPostModal.module.css";
+
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
 const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
-  const [content, setContent] = useState(post.content || '');
-  const [keepExistingImage, setKeepExistingImage] = useState(true);
+  const [content, setContent] = useState(post.content || "");
+  const [keepExistingImage, setKeepExistingImage] = useState(!!post.image);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (post) {
-      setContent(post.content || '');
+      setContent(post.content || "");
       setKeepExistingImage(!!post.image);
       setImage(null);
-      setError('');
+      setError("");
     }
   }, [post]);
 
@@ -31,37 +33,31 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     if (!content && !keepExistingImage && !image) {
-      setError('La publicación debe tener contenido o imagen');
+      setError("La publicación debe tener contenido o imagen");
       setLoading(false);
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append('content', content);
-
-      // Si hay imagen nueva
+      formData.append("content", content);
       if (image) {
-        formData.append('image', image);
-      }
-      // Si quitamos imagen existente sin subir nueva
-      else if (!keepExistingImage && post.image) {
-        formData.append('image', '');
+        formData.append("image", image);
+      } else if (!keepExistingImage && post.image) {
+        formData.append("image", "");
       }
 
-      const res = await axios.put(
-        `${BASE_URL}/api/posts/${post.id}`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          withCredentials: true
-        }
-      );
+      const res = await axios({
+        method: "put",
+        url: `${BASE_URL}/api/posts/${post.id}`,
+        data: formData,
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" }
+      });
 
-      // Construir objeto actualizado
       const updatedPost = {
         ...post,
         content: res.data.content,
@@ -71,8 +67,8 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
       onPostUpdate(updatedPost);
       onClose();
     } catch (err) {
-      console.error('Error al actualizar publicación:', err);
-      setError(err.response?.data?.message || 'Error al actualizar la publicación');
+      console.error("Error al actualizar publicación:", err);
+      setError(err.response?.data?.message || "Error al actualizar la publicación");
     } finally {
       setLoading(false);
     }
@@ -110,7 +106,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
               Cancelar
             </button>
             <button type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar Cambios'}
+              {loading ? "Guardando..." : "Guardar Cambios"}
             </button>
           </div>
         </form>

@@ -372,49 +372,55 @@ const commentPost = async (req, res) => {
 
 // Actualizar una publicación (contenido e imagen)
 const updatePost = async (req, res) => {
-  const { id } = req.params
-  const userId = req.user.id
-  const { content } = req.body
+  const { id } = req.params;
+  const userId = req.user.id;
+  const { content } = req.body;
 
   try {
-    const [posts] = await pool.query("SELECT * FROM posts WHERE id = ?", [id])
+    // 1) Verificar existencia y propietario
+    const [posts] = await pool.query("SELECT * FROM posts WHERE id = ?", [id]);
     if (posts.length === 0) {
-      return res.status(404).json({ message: "Publicación no encontrada" })
+      return res.status(404).json({ message: "Publicación no encontrada" });
     }
-
-    const post = posts[0]
+    const post = posts[0];
     if (post.user_id !== userId) {
-      return res.status(403).json({ message: "No tienes permiso para editar esta publicación" })
+      return res.status(403).json({ message: "No tienes permiso para editar esta publicación" });
     }
 
-    let image = post.image
-
+    // 2) Gestionar imagen
+    let image = post.image;
     if (req.file) {
-      // Borrar la imagen vieja si existe
+      // Borrar imagen vieja si existe
       if (image) {
-        const oldImagePath = path.join(__dirname, "..", "uploads", image)
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath)
-        }
+        const oldImagePath = path.join(process.cwd(), "uploads", path.basename(image));
+        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
       }
       image = `/uploads/${req.file.filename}`;
     }
 
+    // 3) Validar contenido / imagen
     if (!content && !image) {
-      return res.status(400).json({ message: "La publicación debe tener contenido o imagen" })
+      return res.status(400).json({ message: "La publicación debe tener contenido o imagen" });
     }
 
+    // 4) Actualizar en base de datos
     await pool.query(
       "UPDATE posts SET content = ?, image = ? WHERE id = ?",
       [content, image, id]
-    )
+    );
 
-    res.json({ message: "Publicación actualizada" })
+    // 5) Devolver datos actualizados al cliente
+    res.json({
+      id: post.id,
+      content,
+      image,
+      updatedAt: new Date()
+    });
   } catch (error) {
-    console.error("Error al actualizar publicación:", error)
-    res.status(500).json({ message: "Error en el servidor" })
+    console.error("Error al actualizar publicación:", error);
+    res.status(500).json({ message: "Error en el servidor" });
   }
-}
+};
 
 // Eliminar una publicación
 const deletePost = async (req, res) => {
