@@ -39,6 +39,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("🚀 handleSubmit disparado"); 
     setLoading(true)
     setError("")
 
