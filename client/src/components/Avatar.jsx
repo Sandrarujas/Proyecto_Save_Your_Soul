@@ -18,7 +18,7 @@ const Avatar = ({ src, username, size = 40, version = '' }) => {
   }, [src, version]);
 
   const getImageUrl = () => {
-    // Si no hay imagen o hubo error, uso placeholder con dimensiones
+    // Si no hay src o hubo error, uso placeholder con dimensiones
     if (!src || error) {
       return `/placeholder.svg?height=${size}&width=${size}`;
     }
@@ -27,7 +27,7 @@ const Avatar = ({ src, username, size = 40, version = '' }) => {
     const isAbsolute = src.startsWith('http') || src.startsWith('//');
     const fullUrl = isAbsolute ? src : `${BASE_URL}${src}`;
 
-    // Añadir bust cache si version está presente
+    // Añadir cache-buster si version está presente
     return version ? `${fullUrl}?v=${version}` : fullUrl;
   };
 
