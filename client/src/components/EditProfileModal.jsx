@@ -51,7 +51,8 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
         const formData = new FormData()
         formData.append("profileImage", profileImage)
         imageResponse = await axios.put(`${BASE_URL}/api/users/profile-image`,
-+       formData)
++   formData,
++   { withCredentials: true })
       }
 
       onProfileUpdate({
