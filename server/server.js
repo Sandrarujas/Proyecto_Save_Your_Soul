@@ -68,7 +68,51 @@ app.get("/check-file", (req, res) => {
 // Middleware para manejo de errores
 app.use(errorHandler)
 
+// Al principio, tras el require de dotenv:
+const pool = require("./config/db");  // ajusta la ruta si tu db.js está en otro sitio
 
+// Ruta base para comprobar que el servidor responde
+app.get("/", (req, res) => {
+  res.send("🚀 Backend OK");
+});
+
+// Ruta para probar conexión a la base de datos y CRUD mínimo
+app.get("/test-db", async (req, res) => {
+  try {
+    // 1) Prueba de cálculo simple
+    const [calc] = await pool.query("SELECT 1 + 1 AS result");
+
+    // 2) Inserción de un usuario de prueba (opcional)
+    const username = "testuser";
+    const email    = "testuser@example.com";
+
+    // Solo insertamos si no existe
+    const [exists] = await pool.query(
+      "SELECT id FROM users WHERE username = ? OR email = ?",
+      [username, email]
+    );
+    let action;
+    if (exists.length === 0) {
+      const [inserted] = await pool.query(
+        "INSERT INTO users (username, email) VALUES (?, ?)",
+        [username, email]
+      );
+      action = `inserted id ${inserted.insertId}`;
+    } else {
+      action = "already existed";
+    }
+
+    // Devolver resultado
+    res.json({
+      server: "✅ OK",
+      calc:    calc[0].result,
+      userTest: action
+    });
+  } catch (err) {
+    console.error("Error en test-db:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Iniciar servidor
 app.listen(PORT, () => {
