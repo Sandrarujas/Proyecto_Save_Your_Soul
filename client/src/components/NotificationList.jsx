@@ -32,12 +32,15 @@ const NotificationList = () => {
     setError("")
   }
 
-  const renderNotificationContent = ({ type, senderUsername }) => {
+  const renderNotificationContent = (notification) => {
+    const { type, senderUsername, commentContent } = notification
     switch (type) {
       case "like":
         return `${senderUsername} le dio like a tu publicación`
       case "comment":
-        return `${senderUsername} comentó en tu publicación`
+        return commentContent
+          ? `${senderUsername} comentó: "${commentContent}"`
+          : `${senderUsername} comentó en tu publicación`
       case "follow":
         return `${senderUsername} comenzó a seguirte`
       default:
@@ -45,11 +48,15 @@ const NotificationList = () => {
     }
   }
 
-  const renderNotificationLink = ({ type, postId, senderUsername }) => {
+  const renderNotificationLink = (notification) => {
+    const { type, postId, commentId, senderUsername } = notification
     switch (type) {
       case "like":
+        return postId ? `/post/${postId}` : `/profile/${senderUsername}`
       case "comment":
-        return `/post/${postId}`
+        return postId
+          ? `/post/${postId}#comment-${commentId}`
+          : `/profile/${senderUsername}`
       case "follow":
         return `/profile/${senderUsername}`
       default:
@@ -72,7 +79,7 @@ const NotificationList = () => {
 
   return (
     <div className={styles["notification-container"]}>
-      {/* Campana y contador */}
+      {/* Icono de campana con contador */}
       <div
         className={styles["notification-bell"]}
         onClick={toggleDropdown}
@@ -81,7 +88,9 @@ const NotificationList = () => {
         aria-label="Mostrar notificaciones"
       >
         <i className="fas fa-bell"></i>
-        {unreadCount > 0 && <span className={styles["notification-badge"]}>{unreadCount}</span>}
+        {unreadCount > 0 && (
+          <span className={styles["notification-badge"]}>{unreadCount}</span>
+        )}
       </div>
 
       {/* Dropdown de notificaciones */}
@@ -90,14 +99,17 @@ const NotificationList = () => {
           <div className={styles["notification-header"]}>
             <h3>Notificaciones</h3>
             {unreadCount > 0 && (
-              <button className={styles["mark-all-read"]} onClick={markAllNotificationsAsRead}>
+              <button
+                className={styles["mark-all-read"]}
+                onClick={markAllNotificationsAsRead}
+              >
                 Marcar todas como leídas
               </button>
             )}
           </div>
 
           {notificationsLoading ? (
-            <div className={styles["notification-loading"]}>Cargando...</div>
+            <div className={styles["notification-loading"]}>Cargando…</div>
           ) : error ? (
             <div className={styles["notification-error"]}>{error}</div>
           ) : notifications.length > 0 ? (
@@ -125,7 +137,9 @@ const NotificationList = () => {
                     </span>
                   </div>
 
-                  {!notification.isRead && <div className={styles["notification-dot"]}></div>}
+                  {!notification.isRead && (
+                    <div className={styles["notification-dot"]}></div>
+                  )}
                 </Link>
               ))}
             </div>
