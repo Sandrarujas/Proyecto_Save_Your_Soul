@@ -258,17 +258,42 @@ const getPostComments = async (req, res) => {
 
 // Dar like a una publicación
 const likePost = async (req, res) => {
-  const { id } = req.params
-  const userId = req.user.id
+  const { id } = req.params        // id de la publicación
+  const userId = req.user.id       // quien da el like
 
   try {
-    const [existingLike] = await pool.query("SELECT * FROM likes WHERE post_id = ? AND user_id = ?", [id, userId])
+    // 1) Asegúrate de que la publicación existe y saca su owner
+    const [posts] = await pool.query(
+      "SELECT user_id FROM posts WHERE id = ?",
+      [id]
+    )
+    if (posts.length === 0) {
+      return res.status(404).json({ message: "Publicación no encontrada" })
+    }
+    const postOwnerId = posts[0].user_id
 
+    // 2) Comprueba like previo
+    const [existingLike] = await pool.query(
+      "SELECT * FROM likes WHERE post_id = ? AND user_id = ?",
+      [id, userId]
+    )
     if (existingLike.length > 0) {
       return res.status(400).json({ message: "Ya has dado like a esta publicación" })
     }
 
-    await pool.query("INSERT INTO likes (post_id, user_id) VALUES (?, ?)", [id, userId])
+    // 3) Crea el like
+    await pool.query(
+      "INSERT INTO likes (post_id, user_id) VALUES (?, ?)",
+      [id, userId]
+    )
+
+    // 4) **Crea la notificación** de tipo 'like'
+    await pool.query(
+      `INSERT INTO notifications 
+         (user_id, sender_id, type, post_id)
+       VALUES (?, ?, 'like', ?)`,
+      [postOwnerId, userId, id]
+    )
 
     res.json({ message: "Like agregado" })
   } catch (error) {
@@ -300,8 +325,8 @@ const unlikePost = async (req, res) => {
 
 // Comentar en una publicación
 const commentPost = async (req, res) => {
-  const { id } = req.params
-  const userId = req.user.id
+  const { id } = req.params    // id de la publicación
+  const userId = req.user.id   // quien comenta
   const { content } = req.body
 
   if (!content || content.trim() === "") {
@@ -309,23 +334,35 @@ const commentPost = async (req, res) => {
   }
 
   try {
-    const [postExists] = await pool.query("SELECT id FROM posts WHERE id = ?", [id])
-    if (postExists.length === 0) {
+    // 1) Asegúrate de que la publicación existe y saca su owner
+    const [posts] = await pool.query(
+      "SELECT user_id FROM posts WHERE id = ?",
+      [id]
+    )
+    if (posts.length === 0) {
       return res.status(404).json({ message: "Publicación no encontrada" })
     }
+    const postOwnerId = posts[0].user_id
 
+    // 2) Crea el comentario
     const [result] = await pool.query(
       "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)",
       [id, userId, content.trim()]
+    )
+
+    // 3) **Crea la notificación** de tipo 'comment'
+    await pool.query(
+      `INSERT INTO notifications 
+         (user_id, sender_id, type, post_id, comment_id)
+       VALUES (?, ?, 'comment', ?, ?)`,
+      [postOwnerId, userId, id, result.insertId]
     )
 
     res.status(201).json({
       id: result.insertId,
       content: content.trim(),
       createdAt: new Date(),
-      user: {
-        id: userId,
-      },
+      user: { id: userId },
     })
   } catch (error) {
     console.error("Error al crear comentario:", error)
