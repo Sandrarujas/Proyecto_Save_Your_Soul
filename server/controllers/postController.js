@@ -374,7 +374,7 @@ const commentPost = async (req, res) => {
 const updatePost = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
-  const { content } = req.body;
+  const { content, image: imageField } = req.body; // <-- leemos también image del body
 
   try {
     // 1) Verificar existencia y propietario
@@ -387,10 +387,21 @@ const updatePost = async (req, res) => {
       return res.status(403).json({ message: "No tienes permiso para editar esta publicación" });
     }
 
-    // 2) Gestionar imagen
+    // 2) Decidir nueva imagen
     let image = post.image;
+
+    // 2.a) Eliminar la existente si el campo image viene vacío ("")
+    if (!req.file && typeof imageField === "string" && imageField === "") {
+      if (image) {
+        const oldImagePath = path.join(process.cwd(), "uploads", path.basename(image));
+        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+      }
+      image = null;
+    }
+
+    // 2.b) Subir nueva si se ha enviado un fichero
     if (req.file) {
-      // Borrar imagen vieja si existe
+      // borrar antigua si quedaba (por si no la borró el paso anterior)
       if (image) {
         const oldImagePath = path.join(process.cwd(), "uploads", path.basename(image));
         if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
@@ -398,18 +409,18 @@ const updatePost = async (req, res) => {
       image = `/uploads/${req.file.filename}`;
     }
 
-    // 3) Validar contenido / imagen
+    // 3) Validar que al menos haya contenido o imagen
     if (!content && !image) {
       return res.status(400).json({ message: "La publicación debe tener contenido o imagen" });
     }
 
-    // 4) Actualizar en base de datos
+    // 4) Actualizar DB
     await pool.query(
       "UPDATE posts SET content = ?, image = ? WHERE id = ?",
       [content, image, id]
     );
 
-    // 5) Devolver datos actualizados al cliente
+    // 5) Devolver la nueva data
     res.json({
       id: post.id,
       content,
