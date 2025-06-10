@@ -104,6 +104,13 @@ const AdminComments = () => {
 
   return (
     <div className={styles["admin-comments"]}>
+      <button
+        className={styles["admin-btn"]}
+        onClick={() => navigate(-1)}
+        style={{ marginBottom: "10px" }}
+      >
+        ← Volver atrás
+      </button>
       <div className={styles["admin-header"]}>
         <h1>Gestión de Comentarios</h1>
         <p>Total: {pagination?.total || 0} comentarios</p>
