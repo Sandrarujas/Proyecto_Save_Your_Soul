@@ -592,6 +592,7 @@
     transform: translateX(-50%);
     top: 110%; /* un pelín más abajo si quieres */
   }
+  
 }
 
 
@@ -661,9 +662,6 @@
   background-color: #e6f2ff;
 }
 
-/**Estilo para el modal de notificaciones*/
-
-/* Estilos para el modal de notificaciones */
 .notification-modal-overlay {
   position: fixed;
   top: 0;
@@ -796,7 +794,6 @@
   background-color: rgb(32, 124, 105);
 }
 
-/* Estilos para los items de notificación (hacerlos clickeables) */
 .notification-item {
   cursor: pointer;
   transition: background-color 0.2s;
@@ -806,7 +803,6 @@
   background-color: #f5f6f7;
 }
 
-/* Estilos para la página de notificaciones */
 .notifications-page {
   max-width: 800px;
   margin: 0 auto;
@@ -960,4 +956,44 @@
   color: #65676b;
 }
 
+
+@media (max-width: 576px) {
+  .notification-bell {
+    padding: 4px;
+    font-size: 1rem;
+  }
+  .notification-badge {
+    top: 0px;
+    right: 0px;
+    width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+  }
+}
+
+
+@media (max-width: 576px) {
+  .notification-dropdown {
+    width: 90%;             
+    max-width: 300px;       
+    left: 50%;              
+    transform: translateX(-50%);  
+    right: auto;            
+    top: 110%;              
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .notification-bell {
+    padding: 4px;
+    font-size: 1rem;
+  }
+
+  .notification-badge {
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+  }
+}
 

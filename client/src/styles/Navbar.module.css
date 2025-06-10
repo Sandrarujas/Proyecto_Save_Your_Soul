@@ -146,3 +146,34 @@ button {
     font-size: 14px;
   }
 }
+
+@media (max-width: 360px) {
+  .navbar-container {
+    padding: 5px 10px;
+  }
+
+  .navbar-logo {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .navbar-menu {
+    width: 140px;
+  }
+
+  .navbar-item {
+    margin: 8px 0;
+    padding-left: 10px;
+  }
+
+  .navbar-button {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  .navbar-toggle {
+    font-size: 20px;
+    padding: 4px;
+  }
+}
+
