@@ -72,8 +72,8 @@ app.use(errorHandler)
 const pool = require("./config/db");  // ajusta la ruta si tu db.js está en otro sitio
 
 // Ruta base para comprobar que el servidor responde
-app.get("/", (req, res) => {
-  res.send("🚀 Backend OK");
+app.get("/", (_req, res) => {
+  res.redirect(301, "https://proyecto-save-your-soul-client.vercel.app");
 });
 
 // Ruta para probar conexión a la base de datos y CRUD mínimo
