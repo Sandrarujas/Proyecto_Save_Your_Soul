@@ -186,14 +186,19 @@
 
 @media (max-width: 600px) {
   .profile-username-container {
-    flex-direction: column;
-    align-items: flex-start;  
+   flex-direction: column;
+   align-items: flex-start;
+   flex-direction: column;
+  align-items: center;    
+    text-align: center;
   }
   .profile-username {
-    margin-bottom: 8px;      
-    font-size: 24px;         
+    margin-bottom: 8px;
+    font-size: 24px;
   }
   .edit-profile-button {
-    align-self: flex-start;  
+   align-self: flex-start;
+   align-self: center;      
   }
 }
+

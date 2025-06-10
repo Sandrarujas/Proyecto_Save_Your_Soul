@@ -10,7 +10,7 @@ const SearchBar = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
 
-  // Si alguien abre el buscador en móvil, enfocamos el input
+  // Al abrir en móvil, enfocamos el input
   useEffect(() => {
     if (mobileOpen) {
       const inp = document.getElementById("mobile-search-input")
@@ -38,7 +38,7 @@ const SearchBar = () => {
         {mobileOpen ? <FaTimes /> : <FaSearch />}
       </button>
 
-      {/* Formulario normal + móvil abierto */}
+      {/* Formulario: siempre visible en desktop, sólo al abrir en móvil */}
       <form
         onSubmit={handleSubmit}
         className={`${styles.searchForm} ${

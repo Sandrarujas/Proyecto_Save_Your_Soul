@@ -4,7 +4,7 @@
   position: relative;
 }
 
-/* Botón lupa en móvil, oculto en desktop */
+/* Botón lupa, oculto en pantallas grandes */
 .mobileToggle {
   display: none;
   background: none;
@@ -15,7 +15,7 @@
   margin: 0 10px;
 }
 
-/* Formulario por defecto */
+/* Formulario por defecto (desktop) */
 .searchForm {
   display: flex;
   flex: 1;
@@ -43,16 +43,17 @@
   justify-content: center;
 }
 
-/* MEDIACQ mobile: ≤ 480px */
-@media (max-width: 480px) {
-  /* mostramos solo la lupa */
+/* Adaptaciones para móviles */
+@media (max-width: 768px) {
+  /* Mostrar lupa */
   .mobileToggle {
     display: block;
   }
-  /* escondemos el form por defecto */
+
+  /* Ocultar formulario hasta que se abra */
   .searchForm {
     position: absolute;
-    top: 50px;      /* ajusta según tu navbar */
+    top: 50px;      /* Ajusta esto para situarlo bajo tu navbar */
     left: 50%;
     transform: translateX(-50%) scaleY(0);
     transform-origin: top;
@@ -66,13 +67,15 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     z-index: 1000;
   }
-  /* cuando esté abierto */
+
+  /* Cuando está abierto */
   .searchForm.open {
     transform: translateX(-50%) scaleY(1);
     opacity: 1;
     pointer-events: auto;
   }
-  /* reducimos padding y fuentes */
+
+  /* Ajustes interiores */
   .searchInput {
     padding: 6px 10px;
     font-size: 13px;
