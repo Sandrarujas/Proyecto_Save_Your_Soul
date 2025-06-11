@@ -19,9 +19,7 @@ const CommentList = ({
   const [content, setContent] = useState("");
   const { user } = useContext(AuthContext);        // usuario logueado
 
-  // ────────────────────────────────────────────────────────────
-  // Publicar un comentario
-  // ────────────────────────────────────────────────────────────
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content.trim()) return;
