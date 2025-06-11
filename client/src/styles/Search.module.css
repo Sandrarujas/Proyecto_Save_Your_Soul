@@ -124,3 +124,11 @@
   background-color: #e4e6eb;
   color: #1c1e21;
 }
+
+.posts-results {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;     
+  margin: 0 auto;      
+}
