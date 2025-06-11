@@ -7,6 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 import Post from "../components/Post";
 import EditProfileModal from "../components/EditProfileModal";
 import Avatar from "../components/Avatar"
+import styles from "../styles/Profile.module.css"
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
