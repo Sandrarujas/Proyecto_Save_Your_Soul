@@ -90,29 +90,15 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
 
       {showComments && (
         <CommentList
-  comments={comments}
-  postId={post.id}
-  onNewComment={(newComment) => {
-    console.log("CRUDO DEL BACK-END →", newComment);
-
-    // 1️⃣  Mete el comentario que llega TAL CUAL
-    setComments(prev => [newComment, ...prev]);
-
-    // 2️⃣  Suma uno al contador asegurándote de usar el valor fresco
-    setCommentCount(prev => prev + 1);
-
-    // 3️⃣  Si mantienes tu helper de contexto…
-    updatePostComments(post.id, commentCount + 1);      // (o cámbialo a prev + 1)
-
-    // 4️⃣  Notifica al padre (feed) con el mismo objeto que acabamos de guardar
-    onPostUpdate(prevPost => ({
-      ...prevPost,
-      comments: [newComment, ...prevPost.comments],
-      commentCount: prevPost.commentCount + 1,
-    }));
-  }}
-/>
-
+          comments={comments}
+          postId={post.id}
+          onNewComment={(c) => {
+            setComments([c, ...comments]);
+            setCommentCount(commentCount + 1);
+            updatePostComments(post.id, commentCount + 1);
+            onPostUpdate({ ...post, comments: [c, ...comments], commentCount: commentCount + 1 });
+          }}
+        />
       )}
 
       {isEditOpen && (
