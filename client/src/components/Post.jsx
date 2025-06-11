@@ -5,6 +5,8 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import CommentList from "./CommentList";
 import EditPostModal from "./EditPostModal";
+import React from "react";
+import Avatar from "./Avatar";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
@@ -49,15 +51,15 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
   return (
     <div className="post-card">
       <header>
-        <Link to={`/profile/${post.user.username}`}>
-          <img
-            src={post.user.profileImage ? `${BASE_URL}${post.user.profileImage}` : "/placeholder.svg"}
-            alt={post.user.username}
-            className="avatar"
-            onError={() => setImageError(true)}
-          />
-          <span>{post.user.username}</span>
-        </Link>
+        <Link to={`/profile/${post.user.username}`} className="post-user">
+        
+        <Avatar
+          src={post.user.profileImage}
+          username={post.user.username}
+          size={40}
+        />
++        <span className="post-username">{post.user.username}</span>
++      </Link>
         {isOwner && (
           <div className="options">
             <button onClick={() => setShowOptions((v) => !v)}>⋮</button>

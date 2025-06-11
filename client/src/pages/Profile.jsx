@@ -6,6 +6,7 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Post from "../components/Post";
 import EditProfileModal from "../components/EditProfileModal";
+import Avatar from "../components/Avatar"
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
@@ -69,14 +70,11 @@ const Profile = () => {
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-image-container">
-          <img
-            src={
-              profile.profileImage?.startsWith("http")
-                ? profile.profileImage
-                : `${BASE_URL}${profile.profileImage}`
-            }
-            alt={profile.username}
-            className="profile-image"
+      
+          <Avatar
+            src={profile.profileImage}
+            username={profile.username}
+            size={150}
           />
           {isOwnProfile && (
             <button
