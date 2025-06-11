@@ -25,8 +25,8 @@ const Profile = () => {
     const fetchData = async () => {
       try {
         const [{ data: prof }, { data: postsRes }] = await Promise.all([
-          axios.get(`${BASE_URL}/api/users/${username}`, { withCredentials: true }),
-          axios.get(`${BASE_URL}/api/posts/user/${username}`, { withCredentials: true }),
+          axios.get(`${BASE_URL}/api/users/${username}`),
+          axios.get(`${BASE_URL}/api/posts/user/${username}`),
         ]);
         setProfile(prof);
         setPosts(postsRes);
