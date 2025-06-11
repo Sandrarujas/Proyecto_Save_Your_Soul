@@ -93,11 +93,22 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
           comments={comments}
           postId={post.id}
           onNewComment={(c) => {
-            setComments([c, ...comments]);
+            const fullComment = {
+     ...c,
+     user: {
+       username: user.username,
+       profileImage: user.profileImage,
+     },
+   };
+
+   setComments([fullComment, ...comments]);
             setCommentCount(commentCount + 1);
             updatePostComments(post.id, commentCount + 1);
-            onPostUpdate({ ...post, comments: [c, ...comments], commentCount: commentCount + 1 });
-          }}
+onPostUpdate({
+     ...post,
+    comments: [fullComment, ...comments],
+     commentCount: commentCount + 1,
+   });          }}
         />
       )}
 
