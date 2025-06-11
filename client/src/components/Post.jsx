@@ -93,6 +93,8 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
           comments={comments}
           postId={post.id}
           onNewComment={(c) => {
+              console.log('CRUDO DEL BACK-END →', c);   // ← mira la consola
+
             const fullComment = {
      ...c,
      user: {
