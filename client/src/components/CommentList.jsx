@@ -1,4 +1,3 @@
-// src/components/CommentList.jsx
 "use client";
 
 import { useState, useContext } from "react";
@@ -11,19 +10,13 @@ import styles from "../styles/Post.module.css";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
-const CommentList = ({
-  comments: initialComments,
-  postId,
-  photoVersion = "",
-}) => {
-  const { user } = useContext(AuthContext);          // usuario logueado
-
+const CommentList = ({ comments: initialComments, postId, photoVersion = "" }) => {
+  const { user } = useContext(AuthContext);
   const [comments, setComments] = useState(initialComments);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  /* ────────────── enviar comentario ────────────── */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -32,16 +25,15 @@ const CommentList = ({
     setError("");
 
     try {
-      /* 1. POST al backend */
       const { data } = await axios.post(
         `${BASE_URL}/api/posts/${postId}/comments`,
         { content },
         { headers: { "Content-Type": "application/json" } }
       );
 
-      /* 2. Completar si el back no envía username/foto */
+      // Si el back no envía username/foto, complétalo con el usuario logueado
       const fullComment = data.user?.username
-        ? data                                // ya viene “poblado”
+        ? data
         : {
             ...data,
             user: {
@@ -53,11 +45,9 @@ const CommentList = ({
             },
           };
 
-      /* 3. Insertar al principio de la lista */
       setComments((prev) => [fullComment, ...prev]);
       setContent("");
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("No se pudo publicar el comentario");
     } finally {
       setLoading(false);
@@ -66,7 +56,7 @@ const CommentList = ({
 
   return (
     <div className={styles["comments-list"]}>
-      {/* ─── Formulario ─────────────────────────── */}
+      {/* Formulario — solo UNO */}
       <form onSubmit={handleSubmit} className={styles["comment-form"]}>
         <input
           type="text"
@@ -86,15 +76,11 @@ const CommentList = ({
 
       {error && <p className={styles["error"]}>{error}</p>}
 
-      {/* ─── Lista de comentarios ───────────────── */}
-      {comments.length > 0 ? (
+      {comments.length ? (
         comments.map((comment) => (
           <div key={comment.id} className={styles.comment}>
             <div className={styles["comment-header"]}>
-              <Link
-                to={`/profile/${comment.user.username}`}
-                className={styles["comment-user"]}
-              >
+              <Link to={`/profile/${comment.user.username}`} className={styles["comment-user"]}>
                 <Avatar
                   src={comment.user.profileImage}
                   username={comment.user.username}
@@ -102,9 +88,7 @@ const CommentList = ({
                   version={photoVersion}
                   className={styles["comment-user-image"]}
                 />
-                <span className={styles["comment-username"]}>
-                  {comment.user.username}
-                </span>
+                <span className={styles["comment-username"]}>{comment.user.username}</span>
               </Link>
               <span className={styles["comment-date"]}>
                 {new Date(comment.createdAt).toLocaleDateString()}
