@@ -61,6 +61,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
           method: "put",
           url: `${BASE_URL}/api/users/profile-image`,
           data: fd,
+    
           headers: { "Content-Type": "multipart/form-data" },
         })
 

@@ -1,48 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-// Base URL de la API (configurada en .env como REACT_APP_API_BASE_URL)
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
 /**
- * Componente Avatar:
- * - Muestra un placeholder si no hay src o hay error de carga
- * - Soporta URLs absolutas (http(s)://) y relativas (BASE_URL)
- * - Añade un parámetro "v" si se pasa la prop version para bust cache
+ * Avatar
+ * - Si `src` es falsy o falla la carga ⇒ placeholder redondo del tamaño indicado
+ * - Acepta rutas absolutas y relativas (prefijadas con BASE_URL)
+ * - Añade `?v=` para bust-cache cuando pasas la prop `version`
  */
-const Avatar = ({ src, username, size = 40, version = '' }) => {
-  const [error, setError] = useState(false);
+const Avatar = ({ src, username, size = 40, version = "" }) => {
+  const [failed, setFailed] = useState(false);
 
-  // Cada vez que cambian src o version, reseteamos el flag de error
-  useEffect(() => {
-    setError(false);
-  }, [src, version]);
+  // Reinicia el flag cuando cambian src o version
+  useEffect(() => setFailed(false), [src, version]);
 
   const getImageUrl = () => {
-    // Si no hay src o hubo error, uso placeholder con dimensiones
-    if (!src || error) {
+    if (!src || failed) {
+      // placeholder con las mismas dimensiones
       return `/placeholder.svg?height=${size}&width=${size}`;
     }
 
-    // Determinar si es URL absoluta
-    const isAbsolute = src.startsWith('http') || src.startsWith('//');
-    const fullUrl = isAbsolute ? src : `${BASE_URL}${src}`;
+    const absolute = src.startsWith("http") || src.startsWith("//");
+    const full = absolute ? src : `${BASE_URL}${src}`;
 
-    // Añadir cache-buster si version está presente
-    return version ? `${fullUrl}?v=${version}` : fullUrl;
+    return version ? `${full}?v=${version}` : full;
   };
 
   return (
     <img
       src={getImageUrl()}
-      alt={username || 'Usuario'}
+      alt=""                              
       className="avatar-image"
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
-        borderRadius: '50%',
-        objectFit: 'cover',
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        objectFit: "cover",
       }}
-      onError={() => setError(true)}
+      onError={() => setFailed(true)}     
     />
   );
 };
