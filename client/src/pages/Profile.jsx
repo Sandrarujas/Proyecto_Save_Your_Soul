@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
@@ -6,112 +6,150 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Post from "../components/Post";
 import EditProfileModal from "../components/EditProfileModal";
-import Avatar from "../components/Avatar"
-import styles from "../styles/Profile.module.css"
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
+import styles from "../styles/Profile.module.css";
+
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const Profile = () => {
   const { username } = useParams();
   const { user } = useContext(AuthContext);
-
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const isOwnProfile = user?.id === profile?.id;
+  const isOwnProfile = user && profile && user.id === profile.id;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
       try {
-        const [{ data: prof }, { data: postsRes }] = await Promise.all([
-          axios.get(`${BASE_URL}/api/users/${username}`),
-          axios.get(`${BASE_URL}/api/posts/user/${username}`),
-        ]);
-        setProfile(prof);
-        setPosts(postsRes);
-      } catch (err) {
-        console.error(err);
-        setError("Error al cargar el perfil");
-      } finally {
+        const res = await axios.get(`${BASE_URL}/api/users/${username}`);
+        setProfile(res.data);
+        setIsFollowing(res.data.isFollowing);
+
+        const postsRes = await axios.get(`${BASE_URL}/api/posts/user/${username}`);
+        setPosts(postsRes.data);
+
         setLoading(false);
+      } catch (error) {
+        setError("Error al cargar el perfil");
+        setLoading(false);
+        console.error("Error fetching profile:", error);
       }
     };
-    fetchData();
+
+    fetchProfile();
   }, [username]);
 
-  const handleProfileUpdate = (upd) => {
-    setProfile((p) => ({ ...p, ...upd }));
-    if (upd.profileImage) {
-      setPosts((ps) =>
-        ps.map((pt) =>
-          pt.user.id === profile.id
-            ? { ...pt, user: { ...pt.user, profileImage: upd.profileImage } }
-            : pt
-        )
-      );
+  const handleFollow = async () => {
+    try {
+      if (isFollowing) {
+        await axios.delete(`${BASE_URL}/api/users/${profile.id}/unfollow`);
+      } else {
+        await axios.post(`${BASE_URL}/api/users/${profile.id}/follow`);
+      }
+      setIsFollowing(!isFollowing);
+      setProfile({
+        ...profile,
+        followers: isFollowing ? profile.followers - 1 : profile.followers + 1,
+      });
+    } catch (error) {
+      console.error("Error following/unfollowing user:", error);
     }
   };
 
+const handleProfileUpdate = (updatedData) => {
+  setProfile((prevProfile) => ({
+    ...prevProfile,
+    ...updatedData,
+  }));
+
+  if (updatedData.profileImage) {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.user && post.user.id === profile.id
+          ? { ...post, user: { ...post.user, profileImage: updatedData.profileImage } }
+          : post
+      )
+    );
+  }
+};
+
   const handlePostUpdate = (updatedPost) => {
-    setPosts((ps) => ps.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+    console.log("Actualizando publicación:", updatedPost);
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === updatedPost.id ? { ...post, ...updatedPost } : post))
+    );
   };
 
   const handlePostDelete = (postId) => {
-    setPosts((ps) => ps.filter((p) => p.id !== postId));
+    console.log("Eliminando publicación:", postId);
+    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
   };
 
-  if (loading) return <div>Cargando perfil…</div>;
-  if (error) return <div className="error">{error}</div>;
-  if (!profile) return <div>Usuario no encontrado</div>;
+  const incrementProfileComments = () => {
+  setProfile((prev) => ({
+    ...prev,
+    comments: prev.comments + 1,
+  }))
+};
+
+
+const incrementProfileLikes = (liked) => {
+  setProfile((prev) => ({
+    ...prev,
+    likes: prev.likes + (liked ? 1 : -1),
+  }));
+};
+
+
+  if (loading) return <div className={styles["loading"]}>Cargando perfil...</div>;
+  if (error) return <div className={styles["error"]}>{error}</div>;
+  if (!profile) return <div className={styles["error"]}>Usuario no encontrado</div>;
 
   return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <div className="profile-image-container">
-      
-          <Avatar
-            src={profile.profileImage}
-            username={profile.username}
-            size={150}
+    <div className={styles["profile-container"]}>
+      <div className={styles["profile-header"]}>
+        <div className={styles["profile-image-container"]}>
+          <img
+            src={
+              profile.profileImage ? `${BASE_URL}${profile.profileImage}` : "/placeholder.svg?height=150&width=150"
+            }
+            alt={profile.username}
+            className={styles["profile-image"]}
           />
           {isOwnProfile && (
-            <button
-              className="edit-profile-image-button"
-              onClick={() => setIsEditProfileOpen(true)}
-            >
+            <button className={styles["edit-profile-image-button"]} onClick={() => setIsEditModalOpen(true)}>
               Cambiar foto
             </button>
           )}
         </div>
-        <div className="profile-info">
-          <div className="profile-username-container">
-            <h2 className="profile-username">{profile.username}</h2>
+        <div className={styles["profile-info"]}>
+          <div className={styles["profile-username-container"]}>
+            <h1 className={styles["profile-username"]}>{profile.username}</h1>
             {isOwnProfile && (
-              <button
-                className="edit-profile-button"
-                onClick={() => setIsEditProfileOpen(true)}
-              >
-                Editar Perfil
+              <button className={styles["edit-profile-button"]} onClick={() => setIsEditModalOpen(true)}>
+                Editar perfil
               </button>
             )}
           </div>
-          <div className="profile-stats">
-            <div className="profile-stat">
-              <span className="stat-count">{profile.posts}</span>
-              <span className="stat-label">Publicaciones</span>
+          <div className={styles["profile-stats"]}>
+            <div className={styles["profile-stat"]}>
+              <span className={styles["stat-count"]}>{profile.posts}</span>
+              <span className={styles["stat-label"]}>Publicaciones</span>
             </div>
-            <div className="profile-stat">
-              <span className="stat-count">{profile.followers}</span>
-              <span className="stat-label">Seguidores</span>
+            <div className={styles["profile-stat"]}>
+              <span className={styles["stat-count"]}>{profile.followers}</span>
+              <span className={styles["stat-label"]}>Seguidores</span>
             </div>
-            <div className="profile-stat">
-              <span className="stat-count">{profile.following}</span>
-              <span className="stat-label">Siguiendo</span>
+            <div className={styles["profile-stat"]}>
+              <span className={styles["stat-count"]}>{profile.following}</span>
+              <span className={styles["stat-label"]}>Siguiendo</span>
             </div>
-             <div className={styles["profile-stat"]}>
+            <div className={styles["profile-stat"]}>
               <span className={styles["stat-count"]}>{profile.comments}</span>
               <span className={styles["stat-label"]}>Comentarios</span>
             </div>
@@ -119,34 +157,42 @@ const Profile = () => {
               <span className={styles["stat-count"]}>{profile.likes}</span>
               <span className={styles["stat-label"]}>Me gusta</span>
             </div>
-          
           </div>
+          {user && user.id !== profile.id && (
+            <button
+              className={`${styles["follow-button"]} ${isFollowing ? styles["following"] : ""}`}
+              onClick={handleFollow}
+            >
+              {isFollowing ? "Dejar de Seguir" : "Seguir"}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className={styles["profile-bio"]}>
+        <p>{profile.bio || "Sin biografía"}</p>
+      </div>
+      <div className={styles["profile-posts"]}>
+        <h2>Publicaciones</h2>
+        <div className={styles["posts-container"]}>
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <Post key={post.id} post={post} onPostUpdate={handlePostUpdate} onPostDelete={handlePostDelete} onCommentAdded={incrementProfileComments} 
+              onLikeToggled={incrementProfileLikes} />
+            ))
+          ) : (
+            <p>No hay publicaciones disponibles.</p>
+          )}
         </div>
       </div>
 
       {isOwnProfile && (
         <EditProfileModal
-          isOpen={isEditProfileOpen}
-          onClose={() => setIsEditProfileOpen(false)}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
           profile={profile}
           onProfileUpdate={handleProfileUpdate}
         />
       )}
-
-      <section className="posts-section">
-        {posts.length ? (
-          posts.map((post) => (
-            <Post
-              key={post.id}
-              post={post}
-              onPostUpdate={handlePostUpdate}
-              onPostDelete={handlePostDelete}
-            />
-          ))
-        ) : (
-          <p>No tienes publicaciones aún.</p>
-        )}
-      </section>
     </div>
   );
 };
