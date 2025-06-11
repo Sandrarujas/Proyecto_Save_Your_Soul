@@ -28,7 +28,7 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
     : `${BASE_URL}${post.image}`;
 
   async function handleLike() {
-    await axios.post(`${BASE_URL}/api/posts/${post.id}/like`, {}, { withCredentials: true });
+    await axios.post(`${BASE_URL}/api/posts/${post.id}/like`, {}, );
     const nl = !liked, cnt = nl ? likes + 1 : likes - 1;
     setLiked(nl); setLikes(cnt);
     updatePostLikes(post.id, nl, cnt);
@@ -38,7 +38,7 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
   async function handleDelete() {
     if (!window.confirm("¿Eliminar esta publicación?")) return;
     setIsDeleting(true);
-    await axios.delete(`${BASE_URL}/api/posts/${post.id}`, { withCredentials: true });
+    await axios.delete(`${BASE_URL}/api/posts/${post.id}`,);
     deleteFromCtx(post.id);
     onPostDelete(post.id);
   }

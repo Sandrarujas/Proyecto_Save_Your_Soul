@@ -54,7 +54,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
         method: "put",
         url: `${BASE_URL}/api/posts/${post.id}`,
         data: formData,
-        withCredentials: true,
+        
         headers: { "Content-Type": "multipart/form-data" }
       });
 

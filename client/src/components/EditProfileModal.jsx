@@ -46,7 +46,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
       const bioRes = await axios.put(
         `${BASE_URL}/api/users/bio`,
         { bio },
-        { withCredentials: true }
+        
       )
 
       // 2) Preparamos la URL final del avatar
@@ -61,7 +61,6 @@ const EditProfileModal = ({ isOpen, onClose, profile, onProfileUpdate }) => {
           method: "put",
           url: `${BASE_URL}/api/users/profile-image`,
           data: fd,
-          withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         })
 
