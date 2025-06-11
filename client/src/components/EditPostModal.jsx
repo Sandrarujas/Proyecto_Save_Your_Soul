@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import styles from "../styles/EditPostModal.module.css";
+import styles from "../styles/EditPostModal.module.css";   // ← módulo CSS
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
 
@@ -13,6 +13,9 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  /* ────────────────────────────────────────────────────────── */
+  /* sync props → state                                        */
+  /* ────────────────────────────────────────────────────────── */
   useEffect(() => {
     if (post) {
       setContent(post.content || "");
@@ -22,7 +25,10 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
     }
   }, [post]);
 
-  const handleImageChange = e => {
+  /* ────────────────────────────────────────────────────────── */
+  /* handlers                                                  */
+  /* ────────────────────────────────────────────────────────── */
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
@@ -30,7 +36,7 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -50,62 +56,103 @@ const EditPostModal = ({ isOpen, onClose, post, onPostUpdate }) => {
         formData.append("image", "");
       }
 
-      const res = await axios({
-        method: "put",
-        url: `${BASE_URL}/api/posts/${post.id}`,
-        data: formData,
-        
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      const { data } = await axios.put(
+        `${BASE_URL}/api/posts/${post.id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      const updatedPost = {
-        ...post,
-        content: res.data.content,
-        image: res.data.image
-      };
-
-      onPostUpdate(updatedPost);
+      onPostUpdate({ ...post, ...data });
       onClose();
     } catch (err) {
       console.error("Error al actualizar publicación:", err);
-      setError(err.response?.data?.message || "Error al actualizar la publicación");
+      setError(
+        err.response?.data?.message || "Error al actualizar la publicación"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  /* ────────────────────────────────────────────────────────── */
+  /* render                                                    */
+  /* ────────────────────────────────────────────────────────── */
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.editModal}>
-        <h2>Editar Publicación</h2>
-        {error && <div className={styles.error}>{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <textarea
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            placeholder="Escribe tu publicación..."
-            rows={4}
-          />
+    <div className={styles["modal-overlay"]} onClick={onClose}>
+      <div
+        className={styles["edit-post-modal"]}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className={styles["modal-header"]}>
+          <h2>Editar Publicación</h2>
+          <button
+            type="button"
+            className={styles["close-button"]}
+            onClick={onClose}
+          >
+            &#x2715;
+          </button>
+        </header>
 
-          <div className={styles.imageSection}>
-            <label>
+        {error && <div className={styles["error-message"]}>{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          {/* contenido */}
+          <div className={styles["form-group"]}>
+            <label className={styles["form-label"]}>Contenido</label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className={styles["textarea"]}
+              rows={4}
+            />
+          </div>
+
+          {/* imagen */}
+          <div className={styles["image-preview-container"]}>
+            <label className={styles["keep-image"]}>
               <input
                 type="checkbox"
                 checked={keepExistingImage}
-                onChange={e => setKeepExistingImage(e.target.checked)}
+                onChange={(e) => setKeepExistingImage(e.target.checked)}
               />
               Mantener imagen actual
             </label>
-            <input type="file" accept="image/*" onChange={handleImageChange} />
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className={styles["file-input"]}
+            />
+
+            {/* preview si se selecciona imagen nueva */}
+            {image && (
+              <img
+                src={URL.createObjectURL(image)}
+                alt="preview"
+                className={styles["image-preview"]}
+              />
+            )}
           </div>
 
-          <div className={styles.actions}>
-            <button type="button" onClick={onClose} disabled={loading}>
+          {/* botones */}
+          <div className={styles["form-actions"]}>
+            <button
+              type="button"
+              className={styles["cancel-button"]}
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={loading}>
+            <button
+              type="submit"
+              className={styles["save-button"]}
+              disabled={loading}
+            >
               {loading ? "Guardando..." : "Guardar Cambios"}
             </button>
           </div>
