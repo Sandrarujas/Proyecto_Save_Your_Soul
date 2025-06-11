@@ -49,7 +49,7 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
   const applyEdit = (upd) => { setImageError(false); onPostUpdate(upd); setIsEditOpen(false); };
 
   return (
-    <div className="post-card">
+    <div className="post">
       <header>
         <Link to={`/profile/${post.user.username}`} className="post-user">
         
@@ -58,8 +58,8 @@ const Post = ({ post, onPostUpdate, onPostDelete }) => {
           username={post.user.username}
           size={40}
         />
-+        <span className="post-username">{post.user.username}</span>
-+      </Link>
+        <span className="post-username">{post.user.username}</span>
+      </Link>
         {isOwner && (
           <div className="options">
             <button onClick={() => setShowOptions((v) => !v)}>⋮</button>

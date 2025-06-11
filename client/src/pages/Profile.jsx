@@ -110,6 +110,15 @@ const Profile = () => {
               <span className="stat-count">{profile.following}</span>
               <span className="stat-label">Siguiendo</span>
             </div>
+             <div className={styles["profile-stat"]}>
+              <span className={styles["stat-count"]}>{profile.comments}</span>
+              <span className={styles["stat-label"]}>Comentarios</span>
+            </div>
+            <div className={styles["profile-stat"]}>
+              <span className={styles["stat-count"]}>{profile.likes}</span>
+              <span className={styles["stat-label"]}>Me gusta</span>
+            </div>
+          
           </div>
         </div>
       </div>
