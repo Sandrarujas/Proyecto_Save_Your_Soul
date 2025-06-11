@@ -350,6 +350,12 @@ const commentPost = async (req, res) => {
       [id, userId, content.trim()]
     )
 
+    // 3) Obtén username y foto del usuario que acaba de comentar
+   const [users] = await pool.query(
+     "SELECT username, profile_image AS profileImage FROM users WHERE id = ?",     [userId]
+   );
+   const me = users[0];   // { username, profileImage }
+
     // 3) **Crea la notificación** de tipo 'comment'
     await pool.query(
       `INSERT INTO notifications 

@@ -78,7 +78,7 @@ const Home = () => {
   return (
     <div className={styles["home-container"]}>
       <h1>
-        <p>Bienvenid@, {user.username}</p>¿Que hay de nuevo?
+        <p>Bienvenid@ {user.username}</p>¿Que hay de nuevo?
       </h1>
       <div className={styles["posts-container"]}>
         {posts.length > 0 ? (
